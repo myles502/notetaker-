@@ -4,7 +4,7 @@ const fs = require("fs");
 
 const app = express();
 
-const port = 8080;
+const port = process.env.PORT || 3001;
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
@@ -18,28 +18,36 @@ app.use(express.static('public'));
 //   }
 // ]
 
-app.get('/notes',(req,res) => res.sendFile(path.join(__dirname,'../public/notes.html')));
+app.get('/notes',(req,res) => res.sendFile(path.join(__dirname,'./public/notes.html')));
 
-app.get('/', (req,res) => res.sendFile(path.join(__dirname,'../public/index.html')));
+app.get('/', (req,res) => res.sendFile(path.join(__dirname,'./public/index.html')));
 
 
-// app.get('/api/notes', (req,res) => {
-//     console.log("getting all notes");
-//     fs.readFile('./db/db.json','utf8',(error,response)=> {
-//         if (error) throw error;
-//         var notes = JSON.parse(response);//sending data back in json format 
-//         res.json(notes);
+app.get('/api/notes', (req,res) => {
+    console.log("getting all notes");
+    fs.readFile('./db/db.json','utf8',(error,response)=> {
+        if (error) throw error;
+        var notes = JSON.parse(response);//sending data back in json format 
+        res.json(notes);
 
-//     })
-// });
+    })
+});
 
-// app.post('/api/notes', (req,res) => {
-//     const newNote = req.body;
-//     newNote.//route? = newNote.//
-//     //console.log("note added");
-//    // notes.push(newNote);
-//    //res.json(newNote);
-// });
+app.post('/api/notes', (req,res) => {
+    const newNote = req.body;
+    fs.readFile('./db/db.json','utf8',(error,response)=> {
+        if (error) throw error;
+        var notes = JSON.parse(response);
+        notes = [...notes, newNote];
+        fs.writeFile('./db/db.json',JSON.stringify(notes),error => {
+            if (error) throw error;
+            console.log("note added",newNote);
+        })
+
+    })
+    
+  
+});
 
 // app.delete('/api/notes',(req,res) => {
 //     console.log("deleting note");
@@ -53,4 +61,4 @@ app.get('/', (req,res) => res.sendFile(path.join(__dirname,'../public/index.html
 
 
 
-app.listen(port,()=> console.log ("listening on port 8080"));
+app.listen(port,()=> console.log ("listening on port 3001"));
